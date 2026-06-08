@@ -1,6 +1,6 @@
 module Keyword
 
-using Formatting, Printf
+using Printf
 
 export AMPLITUDE, BOUNDARY, BUCKLE, CLOAD, CONN3D2,
        CONNECTOR_BEHAVIOR, CONNECTOR_ELASTICITY, CONNECTOR_FRICTION,
@@ -37,10 +37,7 @@ A vector of strings forming the keyword block.
 """
 function AMPLITUDE(name, x, y)
 
-
-
     lines = @sprintf "*Amplitude, name=%s" name
-
 
     num_rows=size(x)[1]
 
@@ -48,18 +45,12 @@ function AMPLITUDE(name, x, y)
     residual = num_rows/4 - floor(Int, num_rows/4)
 
     if residual == 0.0
-
         num_rows = floor(Int, num_rows/4)
-
     else
-
         num_rows = floor(Int, num_rows/4) + 1
-
     end
 
-
     for i=1:num_rows
-
 
         if (i== num_rows) & (residual > 0.0)
 
@@ -67,23 +58,14 @@ function AMPLITUDE(name, x, y)
             x_last_row =  x[end-residual_inputs + 1:end]
             y_last_row = y[end-residual_inputs + 1:end]
 
-
             if residual_inputs == 1
-
                 line = @sprintf "%9.5f,%9.5f" x_last_row[1] y_last_row[1]
-
             elseif residual_inputs == 2
-
                 line = @sprintf "%9.5f,%9.5f,%9.5f,%9.5f" x_last_row[1] y_last_row[1] x_last_row[2] y_last_row[2]
-
             elseif residual_inputs == 3
-
                 line = @sprintf "%9.5f,%9.5f,%9.5f,%9.5f,%9.5f,%9.5f" x_last_row[1] y_last_row[1] x_last_row[2] y_last_row[2] x_last_row[3] y_last_row[3]
-
-            elseif residual_inputs == 3
-
+            elseif residual_inputs == 4
                 line = @sprintf "%9.5f,%9.5f,%9.5f,%9.5f,%9.5f,%9.5f,%9.5f,%9.5f" x_last_row[1] y_last_row[1] x_last_row[2] y_last_row[2] x_last_row[3] y_last_row[3] x_last_row[4] y_last_row[4]
-
             end
 
             lines = [lines; line]
@@ -94,13 +76,12 @@ function AMPLITUDE(name, x, y)
             range_end = i * 4
             range = range_start:range_end
 
-            line =  @sprintf "%9.5f,%9.5f,%9.5f,%9.5f,%9.5f,%9.5f,%9.5f,%9.5f" x[range[1]] y[range[1]] x[range[2]] y[range[2]] x[range[3]] y[range[3]] x[range[4]] y[range[4]]
+            line = @sprintf "%9.5f,%9.5f,%9.5f,%9.5f,%9.5f,%9.5f,%9.5f,%9.5f" x[range[1]] y[range[1]] x[range[2]] y[range[2]] x[range[3]] y[range[3]] x[range[4]] y[range[4]]
             lines = [lines; line]
 
         end
 
     end
-
 
     return lines
 
@@ -135,21 +116,13 @@ A vector of strings forming the keyword block.
 function BOUNDARY(node_set_name, degrees_of_freedom, op)
 
     if isempty(op)
-
         lines = "*Boundary"
-
     else
-
-        lines = @sprintf"*Boundary, OP=%s" op
-
+        lines = @sprintf "*Boundary, OP=%s" op
     end
 
-    fmt = "{:s}, {:d2}"
-
     for i in eachindex(degrees_of_freedom)
-
-        lines = [lines; format(fmt, node_set_name, degrees_of_freedom[i])]
-
+        lines = [lines; @sprintf "%s, %2d" node_set_name degrees_of_freedom[i]]
     end
 
     return lines
@@ -160,22 +133,13 @@ end
 function BOUNDARY(node::Int, degrees_of_freedom, op)
 
     if isempty(op)
-
         lines = "*Boundary"
-
     else
-
-        lines = @sprintf"*Boundary, OP=%s" op
-
+        lines = @sprintf "*Boundary, OP=%s" op
     end
 
-
-    fmt = "{:d8}, {:d2}"
-
     for i in eachindex(degrees_of_freedom)
-
-        lines = [lines; format(fmt, node, degrees_of_freedom[i])]
-
+        lines = [lines; @sprintf "%8d, %2d" node degrees_of_freedom[i]]
     end
 
     return lines
@@ -185,23 +149,13 @@ end
 function BOUNDARY(node_set_name, degrees_of_freedom, displacement_magnitude, op)
 
     if isempty(op)
-
         lines = "*Boundary"
-
     else
-
-        lines = @sprintf"*Boundary, OP=%s" op
-
+        lines = @sprintf "*Boundary, OP=%s" op
     end
 
-    fmt = "%s, %o,  , %9.3f"
-
-
     for i in eachindex(degrees_of_freedom)
-
-        lines = [lines; @sprintf "%s, %o,  , %9.3f" node_set_name  degrees_of_freedom[i]  displacement_magnitude]
-
-
+        lines = [lines; @sprintf "%s, %o,  , %9.3f" node_set_name degrees_of_freedom[i] displacement_magnitude]
     end
 
     return lines
@@ -211,31 +165,19 @@ end
 
 function BOUNDARY(node_set_name, degrees_of_freedom, displacement_magnitude, amplitude_table_name::String, op)
 
-
     if isempty(op)
-
-        lines = @sprintf "*Boundary, amplitude=%s"  amplitude_table_name
-
+        lines = @sprintf "*Boundary, amplitude=%s" amplitude_table_name
     else
-
-        lines = @sprintf "*Boundary, OP=%s, amplitude=%s"  op amplitude_table_name
-
+        lines = @sprintf "*Boundary, OP=%s, amplitude=%s" op amplitude_table_name
     end
 
-
-
     for i in eachindex(degrees_of_freedom)
-
-        lines = [lines; @sprintf "%s, %o,  , %9.3f" node_set_name  degrees_of_freedom[i]  displacement_magnitude]
-
-
+        lines = [lines; @sprintf "%s, %o,  , %9.3f" node_set_name degrees_of_freedom[i] displacement_magnitude]
     end
 
     return lines
 
 end
-
-
 
 
 """
@@ -269,11 +211,9 @@ function BUCKLE(num_modes, max_eigenvalue, num_vectors, max_iterations)
     lines = "*Buckle"
 
     if isempty(max_eigenvalue)
-        fmt = "{:d5}, , {:d5}, {:d5}"
-        lines = [lines; format(fmt, num_modes, num_vectors, max_iterations)]
+        lines = [lines; @sprintf "%5d, , %5d, %5d" num_modes num_vectors max_iterations]
     else
-        fmt = "{:d5}, {:9.3f}, {:d5}, {:d5}"
-        lines = [lines; format(fmt, num_modes, max_eigenvalue, num_vectors, max_iterations)]
+        lines = [lines; @sprintf "%5d, %9.3f, %5d, %5d" num_modes max_eigenvalue num_vectors max_iterations]
     end
 
     return lines
@@ -312,10 +252,7 @@ A vector of strings forming the keyword block.
 function CLOAD(node_set_name, degree_of_freedom, magnitude)
 
     lines = "*Cload"
-
-    fmt = "{:s}, {:d2}, {:7.4f}"
-
-    lines = [lines; format(fmt, node_set_name, degree_of_freedom, magnitude)]
+    lines = [lines; @sprintf "%s, %2d, %7.4f" node_set_name degree_of_freedom magnitude]
 
     return lines
 
@@ -340,7 +277,7 @@ function CONN3D2(element_number, node_i, node_j)
     lines = "*Element, type=CONN3D2"
     lines = [lines; @sprintf "%d, %d, %d" element_number node_i node_j]
 
-return lines
+    return lines
 
 end
 
@@ -358,9 +295,7 @@ A String (single line).
 """
 function CONNECTOR_BEHAVIOR(name)
 
-    fmt = "*Connector Behavior, name={:s}"
-
-    lines = format(fmt, name)
+    lines = @sprintf "*Connector Behavior, name=%s" name
 
     return lines
 
@@ -380,12 +315,8 @@ A vector of strings forming the keyword block.
 """
 function CONNECTOR_ELASTICITY(component, magnitude)
 
-
-    fmt = "*Connector Elasticity, component={:2d}"
-    lines = format(fmt, component)
-
-    fmt = "{:7.4E},"
-    lines = [lines; format(fmt, magnitude)]
+    lines = @sprintf "*Connector Elasticity, component=%2d" component
+    lines = [lines; @sprintf "%7.4E," magnitude]
 
     return lines
 
@@ -406,9 +337,7 @@ A vector of strings forming the keyword block.
 function CONNECTOR_FRICTION(inputs)
 
     lines = "*Connector Friction, predefined"
-
-    line = @sprintf "%9.5f, %9.5f, %9.5f, %9.5f" inputs[1] inputs[2] inputs[3] inputs[4]
-    lines = [lines; line]
+    lines = [lines; @sprintf "%9.5f, %9.5f, %9.5f, %9.5f" inputs[1] inputs[2] inputs[3] inputs[4]]
 
     return lines
 
@@ -439,11 +368,8 @@ A vector of strings forming the keyword block.
 """
 function CONNECTOR_SECTION(elset, behavior, coordinate_system)
 
-    fmt = "*Connector Section, elset={:s}, behavior={:s}"
-    lines = format(fmt, elset, behavior)
-
-    fmt = "{:s},"
-    lines = [lines; format(fmt, coordinate_system)]
+    lines = @sprintf "*Connector Section, elset=%s, behavior=%s" elset behavior
+    lines = [lines; @sprintf "%s," coordinate_system]
 
     return lines
 
@@ -452,11 +378,8 @@ end
 
 function CONNECTOR_SECTION(elset, coordinate_system)
 
-    fmt = "*Connector Section, elset={:s}"
-    lines = format(fmt, elset)
-
-    fmt = "{:s},"
-    lines = [lines; format(fmt, coordinate_system)]
+    lines = @sprintf "*Connector Section, elset=%s" elset
+    lines = [lines; @sprintf "%s," coordinate_system]
 
     return lines
 
@@ -466,12 +389,8 @@ end
 function CONNECTOR_SECTION(elset, behavior, type, orientation)
 
     lines = @sprintf "*Connector Section, elset=%s, behavior=%s" elset behavior
-
-    line = @sprintf "%s," type
-    lines = [lines; line]
-
-    line = @sprintf "\"%s\"," orientation
-    lines = [lines; line]
+    lines = [lines; @sprintf "%s," type]
+    lines = [lines; @sprintf "\"%s\"," orientation]
 
     return lines
 
@@ -526,13 +445,10 @@ A vector of strings forming the keyword block.
 """
 function CONTROLS(field_type)
 
-    fmt = "*Controls, parameters=field, field={:s}"
-    lines = format(fmt, field_type)
+    lines = @sprintf "*Controls, parameters=field, field=%s" field_type
+    lines = [lines; @sprintf "%9.5f, %9.5f, , , , , ," residual_tolerance correction_tolerance]
 
-    fmt = "{:9.5f}, {:9.5f}, , , , , ,"
-    lines = [lines; format(fmt, residual_tolerance, correction_tolerance)]
-
-return lines
+    return lines
 
 end
 
@@ -559,19 +475,16 @@ function CONTACT_CONTROLS(parameter)
 
     lines = @sprintf "*Contact Controls, %s" parameter
 
-return lines
+    return lines
 
 end
 
 function CONTACT_CONTROLS(parameter, damping_coeff, fraction_of_damping_at_end_of_step, clearance_at_which_damping_becomes_zero)
 
     lines = @sprintf "*Contact Controls, %s" parameter
+    lines = [lines; @sprintf "%s, %9.5f, %9.5f" damping_coeff fraction_of_damping_at_end_of_step clearance_at_which_damping_becomes_zero]
 
-    line = @sprintf "%s, %9.5f, %9.5f" damping_coeff fraction_of_damping_at_end_of_step clearance_at_which_damping_becomes_zero
-
-    lines = [lines; line]
-
-return lines
+    return lines
 
 end
 
@@ -591,17 +504,12 @@ A vector of strings forming the keyword block.
 function CONTACT_INCLUSIONS(all_exterior, surface_pairs)
 
     if all_exterior == true
-
         lines = "*Contact Inclusions, ALL EXTERIOR"
-
     else
-
         lines = "*Contact Inclusions"
-
         for i in eachindex(surface_pairs)
             lines = [lines; @sprintf "%s, %s" surface_pairs[i][1] surface_pairs[i][2]]
         end
-
     end
 
     return lines
@@ -623,13 +531,11 @@ A vector of strings forming the keyword block.
 """
 function CONTACT_INITIALIZATION_ASSIGNMENT(surface_pairs, initialization_name)
 
+    lines = "*Contact Initialization Assignment"
 
-        lines = "*Contact Initialization Assignment"
-
-        for i in eachindex(surface_pairs)
-            lines = [lines; @sprintf "%s, %s, %s" surface_pairs[i][1] surface_pairs[i][2] initialization_name[i]]
-        end
-
+    for i in eachindex(surface_pairs)
+        lines = [lines; @sprintf "%s, %s, %s" surface_pairs[i][1] surface_pairs[i][2] initialization_name[i]]
+    end
 
     return lines
 
@@ -651,7 +557,7 @@ A String (single line).
 """
 function CONTACT_INITIALIZATION_DATA(name, search_above, search_below)
 
-    lines = @sprintf("*Contact Initialization Data, name=%s, SEARCH ABOVE=%9.5f, SEARCH BELOW=%9.5f", name, search_above, search_below)
+    lines = @sprintf "*Contact Initialization Data, name=%s, SEARCH ABOVE=%9.5f, SEARCH BELOW=%9.5f" name search_above search_below
 
 end
 
@@ -671,9 +577,8 @@ A vector of strings forming the keyword block.
 """
 function CONTACT_PAIR(interaction, type, surface_pair)
 
-    lines = @sprintf("*Contact Pair, interaction=\"%s\", type=%s", interaction, type)
-    line = @sprintf "%s, %s" surface_pair[1] surface_pair[2]
-    lines = [lines; line]
+    lines = @sprintf "*Contact Pair, interaction=\"%s\", type=%s" interaction type
+    lines = [lines; @sprintf "%s, %s" surface_pair[1] surface_pair[2]]
 
     return lines
 
@@ -696,13 +601,7 @@ A vector of strings forming the keyword block.
 function CONTACT_PROPERTY_ASSIGNMENT(surface_name_1, surface_name_2, surface_interaction_name)
 
     lines = "*Contact Property Assignment"
-
-    fmt = "{:s}, {:s}, "
-
-    line = format(fmt, surface_name_1, surface_name_2)
-    line_end = @sprintf("\"%s\"", surface_interaction_name)
-
-    lines = [lines; line * line_end]
+    lines = [lines; @sprintf "%s, %s, \"%s\"" surface_name_1 surface_name_2 surface_interaction_name]
 
     return lines
 
@@ -728,7 +627,7 @@ function CONTACT_STABILIZATION(surface_pair)
         lines = [lines; @sprintf "%s, %s" surface_pair[1] surface_pair[2]]
     end
 
-return lines
+    return lines
 
 end
 
@@ -769,10 +668,9 @@ A vector of strings forming the keyword block.
 function CONTROLS_CONSTRAINTS(Tvol, Taxial, Ttshear, Tcont, Tsoft, Tdisp, Trot, Tcfe)
 
     lines = "*Controls, parameters=constraints"
-
     lines = [lines; @sprintf "%9.5f, %9.5f, %9.5f, %9.5f, %9.5f, %9.5f, %9.5f, %9.5f" Tvol Taxial Ttshear Tcont Tsoft Tdisp Trot Tcfe]
 
-return lines
+    return lines
 
 end
 
@@ -792,13 +690,10 @@ A vector of strings forming the keyword block.
 """
 function CONTROLS_FIELD(residual_tolerance, correction_tolerance, field_type)
 
-    fmt = "*Controls, parameters=field, field={:s}"
-    lines = format(fmt, field_type)
+    lines = @sprintf "*Controls, parameters=field, field=%s" field_type
+    lines = [lines; @sprintf "%9.5f, %9.5f, , , , , ," residual_tolerance correction_tolerance]
 
-    fmt = "{:9.5f}, {:9.5f}, , , , , ,"
-    lines = [lines; format(fmt, residual_tolerance, correction_tolerance)]
-
-return lines
+    return lines
 
 end
 
@@ -817,9 +712,7 @@ A vector of strings forming the keyword block.
 function CONTROLS_LINE_SEARCH(num_iterations)
 
     lines = "*Controls, parameters=line search"
-
-    fmt = "{:d2}, , , ,"
-    lines = [lines; format(fmt, num_iterations)]
+    lines = [lines; @sprintf "%2d, , , ," num_iterations]
 
     return lines
 
@@ -861,11 +754,8 @@ A vector of strings forming the keyword block.
 """
 function DENSITY(ρ)
 
-    fmt = "{:9.6f},"
-
     lines = "*Density"
-
-    lines = [lines; format(fmt, ρ)]
+    lines = [lines; @sprintf "%9.6f," ρ]
 
     return lines
 
@@ -888,10 +778,7 @@ A vector of strings forming the keyword block.
 function DLOAD(element_set_name, degree_of_freedom, magnitude)
 
     lines = "*Dload"
-
-    fmt = "{:s}, {:d2}, {:7.4f}"
-
-    lines = [lines; format(fmt, node_set_name, degree_of_freedom, magnitude)]
+    lines = [lines; @sprintf "%s, %2d, %7.4f" element_set_name degree_of_freedom magnitude]
 
     return lines
 
@@ -913,7 +800,6 @@ A vector of strings forming the keyword block.
 function DLOAD_GRAV(acceleration_magnitude, acceleration_direction)
 
     lines = "*Dload"
-
     lines = [lines; @sprintf ", GRAV, %7.4f, %7.4f, %7.4f, %7.4f" acceleration_magnitude acceleration_direction[1] acceleration_direction[2] acceleration_direction[3]]
 
     return lines
@@ -959,7 +845,7 @@ end
 
 function DSLOAD(surface_name, load_type, load_magnitude)
 
-    lines = @sprintf "*Dsload"
+    lines = "*Dsload"
     lines = [lines; @sprintf "%s, %s, %7.4f" surface_name load_type load_magnitude]
 
     return lines
@@ -983,8 +869,8 @@ A vector of strings forming the keyword block.
 """
 function DYNAMIC(application, initial_time_increment, step_time_period, minimum_time_increment, maximum_time_increment)
 
-        lines = @sprintf "*Dynamic, application=%s" application
-        lines = [lines; @sprintf "%7.4f, %7.4f, %e, %7.4f" initial_time_increment step_time_period minimum_time_increment maximum_time_increment]
+    lines = @sprintf "*Dynamic, application=%s" application
+    lines = [lines; @sprintf "%7.4f, %7.4f, %e, %7.4f" initial_time_increment step_time_period minimum_time_increment maximum_time_increment]
 
     return lines
 
@@ -1007,7 +893,7 @@ function DYNAMIC_EXPLICIT(step_time_period, maximum_time_increment)
     lines = "*Dynamic, explicit"
     lines = [lines; @sprintf ", %7.4f, , %7.4f" step_time_period maximum_time_increment]
 
-return lines
+    return lines
 
 end
 
@@ -1048,11 +934,8 @@ A vector of strings forming the keyword block.
 """
 function ELASTIC(E, ν)
 
-    fmt = "{:9.6f}, {:9.6f}"
-
     lines = "*Elastic"
-
-    lines = [lines; format(fmt, E, ν)]
+    lines = [lines; @sprintf "%9.6f, %9.6f" E ν]
 
     return lines
 
@@ -1076,9 +959,7 @@ function ELEMENT_SPRING(elements, type, elset)
     lines = @sprintf "*Element, type= %s, elset= %s" type elset
 
     for i=1:size(elements)[1]
-
-        lines = [lines; @sprintf "%1d, %s" elements[i, 1] elements[i, 2] ]
-
+        lines = [lines; @sprintf "%1d, %s" elements[i, 1] elements[i, 2]]
     end
 
     return lines
@@ -1117,56 +998,30 @@ function ELEMENT(elements, type, nodes_per_element)
     lines = Matrix{String}(undef, size(elements)[1]+1, 1)
 
     if nodes_per_element == 4
-
         lines[1] = "*Element, type=" * type
-
         for i=1:size(elements)[1]
-
             lines[i+1] = @sprintf "%7d,%7d,%7d,%7d,%7d" elements[i,1] elements[i,2] elements[i,3] elements[i,4] elements[i,5]
-
         end
-
     elseif nodes_per_element == 3
-
         lines[1] = "*Element, type=" * type
-
         for i=1:size(elements)[1]
-
             lines[i+1] = @sprintf "%7d,%7d,%7d,%7d" elements[i,1] elements[i,2] elements[i,3] elements[i,4]
-
         end
-
     elseif nodes_per_element == 2
-
-
         lines[1] = "*Element, type=" * type
-
         for i=1:size(elements)[1]
-
             lines[i+1] = @sprintf "%7d,%7d,%7d" elements[i,1] elements[i,2] elements[i,3]
-
         end
-
     elseif nodes_per_element == 8
-
         lines[1] = "*Element, type=" * type
-
         for i=1:size(elements)[1]
-
             lines[i+1] = @sprintf "%7d,%7d,%7d,%7d,%7d,%7d,%7d,%7d,%7d" elements[i,1] elements[i,2] elements[i,3] elements[i,4] elements[i,5] elements[i,6] elements[i,7] elements[i,8] elements[i,9]
-
         end
-
     elseif nodes_per_element == 10
-
         lines[1] = "*Element, type=" * type
-
         for i=1:size(elements)[1]
-
             lines[i+1] = @sprintf "%7d,%7d,%7d,%7d,%7d,%7d,%7d,%7d,%7d,%7d,%7d" elements[i,1] elements[i,2] elements[i,3] elements[i,4] elements[i,5] elements[i,6] elements[i,7] elements[i,8] elements[i,9] elements[i,10] elements[i,11]
-
         end
-
     end
 
     return lines
@@ -1179,18 +1034,11 @@ function ELEMENT(elements, type, nodes_per_element, elset_name)
     lines = Matrix{String}(undef, size(elements)[1]+1, 1)
 
     if nodes_per_element == 2
-
-
         lines[1] = @sprintf "*Element, type=%s, elset=%s" type elset_name
-
         for i=1:size(elements)[1]
-
             lines[i+1] = @sprintf "%7d,%7d,%7d" elements[i,1] elements[i,2] elements[i,3]
-
         end
-
     end
-
 
     return lines
 
@@ -1202,17 +1050,11 @@ function ELEMENT(element_number, node_i, node_j, type, nodes_per_element, elset_
     lines = Matrix{String}(undef, size(element_number)[1]+1, 1)
 
     if nodes_per_element == 2
-
         lines[1] = @sprintf "*Element, type=%s, elset=%s" type elset_name
-
         for i=1:size(element_number)[1]
-
             lines[i+1] = @sprintf "%d,%s,%s" element_number[i] node_i[i] node_j[i]
-
         end
-
     end
-
 
     return lines
 
@@ -1239,18 +1081,15 @@ A vector of strings forming the keyword block.
 """
 function ELEMENT_OUTPUT(directions, fields)
 
-    fmt = "*Element Output, directions={:s}"
-    lines = format(fmt, directions)
+    lines = @sprintf "*Element Output, directions=%s" directions
 
     line = ""
     for i = 1:size(fields)[1]
-
         if i == size(fields)[1]
             line = line * fields[i]
         else
             line = line * fields[i] * ", "
         end
-
     end
 
     lines = [lines; line]
@@ -1261,18 +1100,15 @@ end
 
 function ELEMENT_OUTPUT(directions, fields, elset)
 
-    fmt = "*Element Output, elset={:s}, directions={:s}"
-    lines = format(fmt, elset, directions)
+    lines = @sprintf "*Element Output, elset=%s, directions=%s" elset directions
 
     line = ""
     for i in eachindex(fields)
-
         if i == size(fields)[1]
             line = line * fields[i]
         else
             line = line * fields[i] * ", "
         end
-
     end
 
     lines = [lines; line]
@@ -1296,44 +1132,29 @@ A vector of strings forming the keyword block.
 """
 function ELSET(elements, name)
 
-    #Define number of elements in set.
     num_elements=size(elements)[1]
 
-    #Figure out the number of rows in the set.
     residual = num_elements/16 - floor(Int, num_elements/16)
 
     if residual == 0.0
-
         num_rows = floor(Int, num_elements/16)
-
     else
-
         num_rows = floor(Int, num_elements/16) + 1
         elements = [elements; zeros(Int, 16 - (num_elements - (num_rows - 1) * 16))]
-
     end
 
     lines = "*Elset, elset=" * name
 
     for i=1:num_rows
-
-        #Define the element list formatting.
-        fmt = "{:7d},{:7d},{:7d},{:7d},{:7d},{:7d},{:7d},{:7d},{:7d},{:7d},{:7d},{:7d},{:7d},{:7d},{:7d},{:7d}"
-
         range_start = (i-1) * 16 + 1
         range_end = i * 16
         range = range_start:range_end
-
-        lines = [lines; format(fmt, elements[range[1]], elements[range[2]], elements[range[3]], elements[range[4]], elements[range[5]], elements[range[6]], elements[range[7]], elements[range[8]], elements[range[9]], elements[range[10]], elements[range[11]], elements[range[12]], elements[range[13]], elements[range[14]], elements[range[15]], elements[range[16]])]
-
+        lines = [lines; @sprintf "%7d,%7d,%7d,%7d,%7d,%7d,%7d,%7d,%7d,%7d,%7d,%7d,%7d,%7d,%7d,%7d" elements[range[1]] elements[range[2]] elements[range[3]] elements[range[4]] elements[range[5]] elements[range[6]] elements[range[7]] elements[range[8]] elements[range[9]] elements[range[10]] elements[range[11]] elements[range[12]] elements[range[13]] elements[range[14]] elements[range[15]] elements[range[16]]]
     end
 
-
     if residual != 0.0
-
         index = findfirst(" 0", lines[end])[1]
         lines[end] = lines[end][1:index - 7]
-
     end
 
     return lines
@@ -1355,18 +1176,15 @@ A vector of strings forming the keyword block.
 """
 function EL_PRINT(variables, elset_name)
 
-    fmt = "*El Print, elset={:s}"
-    lines = format(fmt, elset_name)
+    lines = @sprintf "*El Print, elset=%s" elset_name
 
     line = ""
     for i in eachindex(variables)
-
         if i == size(variables)[1]
             line = line * variables[i]
         else
             line = line * variables[i] * ", "
         end
-
     end
 
     lines = [lines; line]
@@ -1401,13 +1219,8 @@ function EQUATION(num_of_equations, node_label_i, dof_i, magnitude_i, node_label
     lines = "*Equation"
 
     for i in eachindex(node_label_i)
-
-        line = @sprintf "%d" num_of_equations[i]
-        lines = [lines; line]
-
-        line = @sprintf "%s, %d, %7.4f, %s, %d, %7.4f" node_label_i[i] dof_i[i] magnitude_i[i] node_label_j[i] dof_j[i] magnitude_j[i]
-        lines = [lines; line]
-
+        lines = [lines; @sprintf "%d" num_of_equations[i]]
+        lines = [lines; @sprintf "%s, %d, %7.4f, %s, %d, %7.4f" node_label_i[i] dof_i[i] magnitude_i[i] node_label_j[i] dof_j[i] magnitude_j[i]]
     end
 
     return lines
@@ -1440,21 +1253,11 @@ A vector of strings forming the keyword block.
 """
 function FASTENER(name, property, reference_node_set, elset, coupling, attachment_method, weighting_method, adjust_orientation, number_of_layers, radius_of_influence, projection_direction)
 
-    fmt = "*Fastener, interaction name={:s}, property={:s}, reference node set={:s}, elset={:s}, coupling={:s}, attachment method={:s}, weighting method={:s},"
-
-    lines = format(fmt, name, property, reference_node_set, elset, coupling, attachment_method, weighting_method)
-
-    fmt = "adjust orientation={:s},"
-    lines = [lines; format(fmt, adjust_orientation)]
-
-    fmt = "number of layers={:2d},"
-    lines = [lines; format(fmt, number_of_layers)]
-
-    fmt = "radius of influence={:9.5f}"
-    lines = [lines; format(fmt, radius_of_influence)]
-
-    fmt = "{:7.4f}, {:7.4f}, {:7.4f}"
-    lines = [lines; format(fmt, projection_direction[1], projection_direction[2], projection_direction[3])]
+    lines = @sprintf "*Fastener, interaction name=%s, property=%s, reference node set=%s, elset=%s, coupling=%s, attachment method=%s, weighting method=%s," name property reference_node_set elset coupling attachment_method weighting_method
+    lines = [lines; @sprintf "adjust orientation=%s," adjust_orientation]
+    lines = [lines; @sprintf "number of layers=%2d," number_of_layers]
+    lines = [lines; @sprintf "radius of influence=%9.5f" radius_of_influence]
+    lines = [lines; @sprintf "%7.4f, %7.4f, %7.4f" projection_direction[1] projection_direction[2] projection_direction[3]]
 
     return lines
 
@@ -1476,9 +1279,7 @@ A vector of strings forming the keyword block.
 function FASTENER_PROPERTY(name, radius)
 
     lines = "*Fastener Property, name=" * name
-
-    fmt = "{:9.5f}"
-    lines = [lines; format(fmt, radius)]
+    lines = [lines; @sprintf "%9.5f" radius]
 
     return lines
 end
@@ -1503,11 +1304,8 @@ A vector of strings forming the keyword block.
 """
 function FRICTION(slip_tolerance, friction_coeff)
 
-    fmt = "*Friction, slip tolerance={:7.5f}"
-    lines = format(fmt, slip_tolerance)
-
-    fmt = "{:7.5f},"
-    lines = [lines; format(fmt, friction_coeff)]
+    lines = @sprintf "*Friction, slip tolerance=%7.5f" slip_tolerance
+    lines = [lines; @sprintf "%7.5f," friction_coeff]
 
     return lines
 
@@ -1517,9 +1315,7 @@ end
 function FRICTION(friction_coeff)
 
     lines = "*Friction"
-
-    fmt = "{:7.5f},"
-    lines = [lines; format(fmt, friction_coeff)]
+    lines = [lines; @sprintf "%7.5f," friction_coeff]
 
     return lines
 
@@ -1542,13 +1338,10 @@ A matrix of strings forming the keyword block.
 function HEADING(heading_lines)
 
     lines = Matrix{String}(undef, size(heading_lines)[1]+1, 1)
-
     lines[1] = "*Heading"
 
     for i in eachindex(heading_lines)
-
         lines[i+1] = "**" * heading_lines[i]
-
     end
 
     return lines
@@ -1580,9 +1373,7 @@ A vector of strings forming the full instance block including `*End Instance`.
 function INSTANCE(instance_name, part_name, offset_coordinates)
 
     lines = @sprintf "*Instance, name=%s, part=%s" instance_name part_name
-
     lines = [lines; @sprintf "%7.4f, %7.4f, %7.4f" offset_coordinates[1] offset_coordinates[2] offset_coordinates[3]]
-
     lines = [lines; "*End Instance"]
 
     return lines
@@ -1593,11 +1384,8 @@ end
 function INSTANCE(instance_name, part_name, offset_coordinates, point_a_coordinates, point_b_coordinates, rotation_angle_a_b)
 
     lines = @sprintf "*Instance, name=%s, part=%s" instance_name part_name
-
     lines = [lines; @sprintf "%7.4f, %7.4f, %7.4f" offset_coordinates[1] offset_coordinates[2] offset_coordinates[3]]
-
     lines = [lines; @sprintf "%7.4f, %7.4f, %7.4f, %7.4f, %7.4f, %7.4f, %7.4f" point_a_coordinates[1] point_a_coordinates[2] point_a_coordinates[3] point_b_coordinates[1] point_b_coordinates[2] point_b_coordinates[3] rotation_angle_a_b]
-
     lines = [lines; "*End Instance"]
 
     return lines
@@ -1622,12 +1410,8 @@ function KINEMATIC_COUPLING(ref_node, node_set_name, degrees_of_freedom)
 
     lines = @sprintf "*Kinematic Coupling, ref node=%d" ref_node
 
-
     for i in eachindex(degrees_of_freedom)
-
-        lines = [lines; @sprintf "%s, %o, " node_set_name  degrees_of_freedom[i] ]
-
-
+        lines = [lines; @sprintf "%s, %o, " node_set_name degrees_of_freedom[i]]
     end
 
     return lines
@@ -1666,15 +1450,11 @@ A matrix of strings forming the keyword block.
 """
 function NODE(nodes)
 
-
     lines = Matrix{String}(undef, size(nodes)[1]+1, 1)
-
     lines[1] = "*Node"
 
-    fmt = "{:14d},{:14.8f},{:14.8f},{:14.8f}"
-
     for i=1:size(nodes)[1]
-        lines[i+1] = format(fmt, nodes[i, 1], nodes[i, 2], nodes[i, 3], nodes[i, 4])
+        lines[i+1] = @sprintf "%14d,%14.8f,%14.8f,%14.8f" nodes[i, 1] nodes[i, 2] nodes[i, 3] nodes[i, 4]
     end
 
     return lines
@@ -1699,13 +1479,11 @@ function NODE_OUTPUT(fields)
 
     line = ""
     for i in eachindex(fields)
-
         if i == size(fields)[1]
             line = line * fields[i]
         else
             line = line * fields[i] * ", "
         end
-
     end
 
     lines = [lines; line]
@@ -1729,18 +1507,15 @@ A vector of strings forming the keyword block.
 """
 function NODE_PRINT(variables, nset_name)
 
-    fmt = "*Node Print, nset={:s}"
-    lines = format(fmt, nset_name)
+    lines = @sprintf "*Node Print, nset=%s" nset_name
 
     line = ""
     for i in eachindex(variables)
-
         if i == size(variables)[1]
             line = line * variables[i]
         else
             line = line * variables[i] * ", "
         end
-
     end
 
     lines = [lines; line]
@@ -1772,44 +1547,29 @@ A vector of strings forming the keyword block.
 """
 function NSET(nodes, name)
 
-    #Define number of nodes in set.
     num_nodes=size(nodes)[1]
 
-    #Figure out the number of rows in the set.
     residual = num_nodes/16 - floor(Int, num_nodes/16)
 
     if residual == 0.0
-
         num_rows = floor(Int, num_nodes/16)
-
     else
-
         num_rows = floor(Int, num_nodes/16) + 1
         nodes = [nodes; zeros(Int, 16 - (num_nodes - (num_rows - 1) * 16))]
-
     end
 
     lines = "*Nset, nset=" * name
 
     for i=1:num_rows
-
-        #Define the node list formatting.
-        fmt = "{:7d},{:7d},{:7d},{:7d},{:7d},{:7d},{:7d},{:7d},{:7d},{:7d},{:7d},{:7d},{:7d},{:7d},{:7d},{:7d}"
-
         range_start = (i-1) * 16 + 1
         range_end = i * 16
         range = range_start:range_end
-
-        lines = [lines; format(fmt, nodes[range[1]], nodes[range[2]], nodes[range[3]], nodes[range[4]], nodes[range[5]], nodes[range[6]], nodes[range[7]], nodes[range[8]], nodes[range[9]], nodes[range[10]], nodes[range[11]], nodes[range[12]], nodes[range[13]], nodes[range[14]], nodes[range[15]], nodes[range[16]])]
-
+        lines = [lines; @sprintf "%7d,%7d,%7d,%7d,%7d,%7d,%7d,%7d,%7d,%7d,%7d,%7d,%7d,%7d,%7d,%7d" nodes[range[1]] nodes[range[2]] nodes[range[3]] nodes[range[4]] nodes[range[5]] nodes[range[6]] nodes[range[7]] nodes[range[8]] nodes[range[9]] nodes[range[10]] nodes[range[11]] nodes[range[12]] nodes[range[13]] nodes[range[14]] nodes[range[15]] nodes[range[16]]]
     end
 
-
     if residual != 0.0
-
         index = findfirst(" 0", lines[end])[1]
         lines[end] = lines[end][1:index - 7]
-
     end
 
     return lines
@@ -1819,38 +1579,25 @@ end
 
 function NSET(name, nset_names::Vector{String})
 
-    #Define number of groups in set.
     num_sets=size(nset_names)[1]
 
-    #Figure out the number of rows in the set.
     residual = num_sets/4 - floor(Int, num_sets/4)
 
     if residual == 0.0
-
         num_rows = floor(Int, num_sets/4)
-
     else
-
         num_rows = floor(Int, num_sets/4) + 1
         nset_names = [nset_names; fill("", 4 - (num_sets - (num_rows - 1) * 4))]
-
     end
 
     lines = "*Nset, nset=" * name
 
     for i=1:num_rows
-
-        #Define the node list formatting.
-        fmt = "{:s},{:s},{:s},{:s}"
-
         range_start = (i-1) * 4 + 1
         range_end = i * 4
         range = range_start:range_end
-
-        lines = [lines; format(fmt, nset_names[range[1]], nset_names[range[2]], nset_names[range[3]], nset_names[range[4]])]
-
+        lines = [lines; @sprintf "%s,%s,%s,%s" nset_names[range[1]] nset_names[range[2]] nset_names[range[3]] nset_names[range[4]]]
     end
-
 
     return lines
 
@@ -1877,12 +1624,8 @@ A vector of strings forming the keyword block.
 function ORIENTATION(name, local_x_axis, local_y_axis)
 
     lines = @sprintf "*Orientation, name=%s" name
-
-    line = @sprintf "%9.5f, %9.5f, %9.5f, %9.5f, %9.5f, %9.5f" local_x_axis[1] local_x_axis[2] local_x_axis[3] local_y_axis[1] local_y_axis[2] local_y_axis[3]
-    lines = [lines; line]
-
-    line = @sprintf "1, 0."
-    lines = [lines; line]
+    lines = [lines; @sprintf "%9.5f, %9.5f, %9.5f, %9.5f, %9.5f, %9.5f" local_x_axis[1] local_x_axis[2] local_x_axis[3] local_y_axis[1] local_y_axis[2] local_y_axis[3]]
+    lines = [lines; "1, 0."]
 
     return lines
 
@@ -1904,11 +1647,9 @@ A String (single line).
 function OUTPUT(field_or_history, variable)
 
     if isempty(variable)
-        fmt = "*Output, {:s}"
-        lines = format(fmt, field_or_history)
+        lines = @sprintf "*Output, %s" field_or_history
     else
-        fmt = "*Output, {:s}, variable={:s}"
-        lines = format(fmt, field_or_history, variable)
+        lines = @sprintf "*Output, %s, variable=%s" field_or_history variable
     end
 
     return lines
@@ -1930,7 +1671,7 @@ A String (single line).
 """
 function OUTPUT_TIME_POINTS(field_or_history, time_points_name)
 
-        lines = @sprintf "*Output, %s, TIME POINTS=%s" field_or_history time_points_name
+    lines = @sprintf "*Output, %s, TIME POINTS=%s" field_or_history time_points_name
 
     return lines
 
@@ -1958,7 +1699,6 @@ A vector of strings forming the complete part block.
 function PART(name, node_lines, element_lines, nset_lines, elset_lines, section_lines)
 
     lines = "*Part, name=" * name
-
     lines = [lines; node_lines; element_lines; nset_lines; elset_lines; section_lines; "*End Part"]
 
     return lines
@@ -1978,13 +1718,11 @@ A matrix of strings forming the keyword block.
 """
 function PLASTIC(curve)
 
-    fmt = "{:9.6f}, {:9.6f}"
     lines = Matrix{String}(undef, size(curve)[1]+1, 1)
-
     lines[1] = "*Plastic"
 
     for i = 1:size(curve)[1]
-        lines[i+1] = format(fmt, curve[i, 1], curve[i, 2])
+        lines[i+1] = @sprintf "%9.6f, %9.6f" curve[i, 1] curve[i, 2]
     end
 
     return lines
@@ -2026,8 +1764,7 @@ A String (single line).
 """
 function RESTART(read_or_write, frequency)
 
-    fmt = "*Restart, {:s}, frequency={:2d}"
-    lines = format(fmt, read_or_write, frequency)
+    lines = @sprintf "*Restart, %s, frequency=%2d" read_or_write frequency
 
     return lines
 
@@ -2082,15 +1819,12 @@ function SHELL_SECTION(elset_name, material_name, offset, t, num_integration_poi
     start_line = "*Shell Section, elset=" * elset_name * ", material=" * material_name * ", offset="
 
     if typeof(offset) == String
-        fmt = "{:s}{:s}"
+        lines = start_line * offset
     elseif typeof(offset) == Float64
-        fmt = "{:s}{:2.1f}"
+        lines = @sprintf "%s%2.1f" start_line offset
     end
 
-    lines = format(fmt, start_line, offset)
-
-    fmt = "{:7.4f},{:2d}"
-    lines = [lines; format(fmt, t, num_integration_points)]
+    lines = [lines; @sprintf "%7.4f,%2d" t num_integration_points]
 
     return lines
 
@@ -2171,47 +1905,33 @@ function BEAM_SECTION(elset_name, material_name, section_type, dims, n1, n2, n3;
     end
 
     if s == "BOX"
-        # (a, b, t1, t2, t3, t4)
         line2 = @sprintf "%g, %g, %g, %g, %g, %g" dims[1] dims[2] dims[3] dims[4] dims[5] dims[6]
     elseif s == "PIPE"
-        # (r, t)
         line2 = @sprintf "%g, %g" dims[1] dims[2]
     elseif s == "CIRC"
-        # (r,)
         line2 = @sprintf "%g" dims[1]
     elseif s == "RECT"
-        # (a, b)
         line2 = @sprintf "%g, %g" dims[1] dims[2]
     elseif s == "HEX"
-        # (d, t)
         line2 = @sprintf "%g, %g" dims[1] dims[2]
     elseif s == "TRAPEZOID"
-        # (a, b, c, d)
         line2 = @sprintf "%g, %g, %g, %g" dims[1] dims[2] dims[3] dims[4]
     elseif s == "I"
-        # (l, h, b1, b2, t1, t2, t3)
         line2 = @sprintf "%g, %g, %g, %g, %g, %g, %g" dims[1] dims[2] dims[3] dims[4] dims[5] dims[6] dims[7]
     elseif s == "T"
-        # T has no Abaqus section=T keyword — written as I with bottom flange zeroed (b1=0, t1=0)
-        # dims = (b, h, l, tf, tw): flange width, total height, dist centroid-bottom, flange t, web t
         b_f, h_t, l_t, tf_t, tw_t = dims
         line1 = "*Beam Section, elset=" * elset_name * ", material=" * material_name * ", section=I"
         line2 = @sprintf "%g, %g, %g, %g, %g, %g, %g" l_t h_t 0.0 b_f 0.0 tf_t tw_t
     elseif s == "L"
-        # (a, b, t1, t2)
         line2 = @sprintf "%g, %g, %g, %g" dims[1] dims[2] dims[3] dims[4]
     elseif s == "CHANNEL" || s == "HAT"
-        # *Beam General Section required — cannot use during-analysis integration
-        # Material defined inline: poisson= on keyword line, E and G on 4th data line
         if any(isnothing, (E, G, poisson))
             error("BEAM_SECTION: $section_type requires keyword args E, G, and poisson")
         end
         line1 = @sprintf "*Beam General Section, elset=%s, poisson=%g, section=%s" elset_name poisson s
         if s == "CHANNEL"
-            # (l, h, b1, b2, t1, t2, t3, o)
             line2 = @sprintf "%g, %g, %g, %g, %g, %g, %g, %g" dims[1] dims[2] dims[3] dims[4] dims[5] dims[6] dims[7] dims[8]
         else
-            # HAT: (l, h, b, b1, b2, t1, t2, t3)
             line2 = @sprintf "%g, %g, %g, %g, %g, %g, %g, %g" dims[1] dims[2] dims[3] dims[4] dims[5] dims[6] dims[7] dims[8]
         end
         line3 = @sprintf "%g, %g, %g" n1 n2 n3
@@ -2291,9 +2011,7 @@ function BEAM_ARBITRARY_SECTION(elset_name, material_name, nodes, thicknesses, n
 
     line1 = "*Beam Section, elset=" * elset_name * ", material=" * material_name * ", section=ARBITRARY"
 
-    # First data line: n_seg, x1_A, x2_A, x1_B, x2_B, t_AB — all on one line
     first_line = @sprintf "%d, %g, %g, %g, %g, %g" n_seg nodes[1,1] nodes[1,2] nodes[2,1] nodes[2,2] thicknesses[1]
-    # Subsequent segments: x1_new, x2_new, t (3 values each)
     rest_lines  = [@sprintf "%g, %g, %g" nodes[i+1,1] nodes[i+1,2] thicknesses[i] for i in 2:n_seg]
     line_orient = @sprintf "%g, %g, %g" n1 n2 n3
 
@@ -2346,11 +2064,8 @@ A vector of strings forming the keyword block.
 """
 function STATIC(stabilize, allsdtol, continue_flag, initial_time_increment, step_time_period, minimum_time_increment, maximum_time_increment)
 
-    fmt = "*Static, stabilize={:7.5f}, allsdtol={:7.5f}, continue={:s}"
-    lines = format(fmt, stabilize, allsdtol, continue_flag)
-
-    fmt = "{:7.4f},{:7.4f}, {:7.4E},{:7.4f}"
-    lines = [lines; format(fmt, initial_time_increment, step_time_period, minimum_time_increment, maximum_time_increment)]
+    lines = @sprintf "*Static, stabilize=%7.5f, allsdtol=%7.5f, continue=%s" stabilize allsdtol continue_flag
+    lines = [lines; @sprintf "%7.4f,%7.4f, %7.4E,%7.4f" initial_time_increment step_time_period minimum_time_increment maximum_time_increment]
 
 end
 
@@ -2381,31 +2096,25 @@ A String (single line).
 """
 function STEP(name, nlgeom, inc::Int)
 
-    fmt = "*Step, name={:s}, nlgeom={:s}, inc={:d16}"
-
-    lines = format(fmt, name, nlgeom, inc)
+    lines = @sprintf "*Step, name=%s, nlgeom=%s, inc=%16d" name nlgeom inc
 
 end
 
 function STEP(name, nlgeom, perturbation::String)
 
-    fmt = "*Step, name={:s}, nlgeom={:s}, {:s}"
-
-    lines = format(fmt, name, nlgeom, perturbation)
+    lines = @sprintf "*Step, name=%s, nlgeom=%s, %s" name nlgeom perturbation
 
 end
 
 function STEP(name, nlgeom, inc::Int, convert_SDI)
 
-    fmt = "*Step, name={:s}, nlgeom={:s}, inc={:d16}, convert SDI={:s}"
-
-    lines = format(fmt, name, nlgeom, inc, convert_SDI)
+    lines = @sprintf "*Step, name=%s, nlgeom=%s, inc=%16d, convert SDI=%s" name nlgeom inc convert_SDI
 
 end
 
 function STEP(name, nlgeom)
 
-    lines = @sprintf "*Step, name=%s, nlgeom=%s" name   nlgeom
+    lines = @sprintf "*Step, name=%s, nlgeom=%s" name nlgeom
 
 end
 
@@ -2466,8 +2175,7 @@ A String (single line).
 """
 function SURFACE_BEHAVIOR(pressure_overclosure)
 
-    fmt = "*Surface Behavior, pressure-overclosure={:s}"
-    lines = format(fmt, pressure_overclosure)
+    lines = @sprintf "*Surface Behavior, pressure-overclosure=%s" pressure_overclosure
 
     return lines
 
@@ -2488,11 +2196,8 @@ A vector of strings forming the keyword block.
 """
 function SURFACE_INTERACTION(name, surface_out_of_plane_thickness)
 
-    lines = @sprintf("*Surface Interaction, name=\"%s\"", name)
-
-    fmt = "{:7.5f},"
-
-    lines = [lines; format(fmt, surface_out_of_plane_thickness)]
+    lines = @sprintf "*Surface Interaction, name=\"%s\"" name
+    lines = [lines; @sprintf "%7.5f," surface_out_of_plane_thickness]
 
     return lines
 
@@ -2515,11 +2220,8 @@ A vector of strings forming the keyword block.
 """
 function TIE(name, master_surface, slave_surface, adjust)
 
-    lines = @sprintf"*Tie, name=%s, ADJUST=%s" name adjust
-
-    line = @sprintf"%s, %s" slave_surface master_surface
-
-    lines = [lines; line]
+    lines = @sprintf "*Tie, name=%s, ADJUST=%s" name adjust
+    lines = [lines; @sprintf "%s, %s" slave_surface master_surface]
 
     return lines
 
@@ -2543,10 +2245,7 @@ function TIME_POINTS(name, points)
     lines = @sprintf "*TIME POINTS, name=%s" name
 
     for i in eachindex(points)
-
-        line = @sprintf "%9.5f" points[i]
-        lines = [lines; line]
-
+        lines = [lines; @sprintf "%9.5f" points[i]]
     end
 
     return lines
@@ -2591,51 +2290,15 @@ function UEL_PROPERTY_DING_CONNECTOR(elset, inputs, dof)
 
     (; d,
     dmgtype,
-    strain1p,
-    strain2p,
-    strain3p,
-    strain4p,
-    strain1n,
-    strain2n,
-    strain3n,
-    strain4n,
-
-    stress1p,
-    stress2p,
-    stress3p,
-    stress4p,
-    stress1n,
-    stress2n,
-    stress3n,
-    stress4n,
-
-
-    rDispP,
-    rForceP,
-    uForceP,
-    rDispN,
-    rForceN,
-    uForceN,
-
-
-    gammaK1,
-    gammaK2,
-    gammaK3,
-    gammaK4,
-    gammaKLimit,
-
-    gammaD1,
-    gammaD2,
-    gammaD3,
-    gammaD4,
-    gammaDLimit,
-
-    gammaF1,
-    gammaF2,
-    gammaF3,
-    gammaF4,
-    gammaFLimit,
-
+    strain1p, strain2p, strain3p, strain4p,
+    strain1n, strain2n, strain3n, strain4n,
+    stress1p, stress2p, stress3p, stress4p,
+    stress1n, stress2n, stress3n, stress4n,
+    rDispP, rForceP, uForceP,
+    rDispN, rForceN, uForceN,
+    gammaK1, gammaK2, gammaK3, gammaK4, gammaKLimit,
+    gammaD1, gammaD2, gammaD3, gammaD4, gammaDLimit,
+    gammaF1, gammaF2, gammaF3, gammaF4, gammaFLimit,
     gE) = inputs
 
     if dmgtype == "energy"
@@ -2645,24 +2308,12 @@ function UEL_PROPERTY_DING_CONNECTOR(elset, inputs, dof)
     end
 
     lines = @sprintf "*UEL property, elset = %s" elset
-
-    line = @sprintf "%9.6e, %9.6e, %9.6e, %9.6e, %9.6e, %9.6e, %9.6e, %9.6e" strain1p strain2p strain3p strain4p stress1p stress2p stress3p stress4p
-    lines = [lines; line]
-
-    line = @sprintf "%9.6e, %9.6e, %9.6e, %9.6e, %9.6e, %9.6e, %9.6e, %9.6e" strain1n strain2n strain3n strain4n stress1n stress2n stress3n stress4n
-    lines = [lines; line]
-
-    line = @sprintf "%9.6e, %9.6e, %9.6e, %9.6e, %9.6e, %9.6e, %9.6e, %9.6e" rDispP rForceP uForceP rDispN rForceN uForceN gammaK1 gammaK2
-    lines = [lines; line]
-
-    line = @sprintf "%9.6e, %9.6e, %9.6e, %9.6e, %9.6e, %9.6e, %9.6e, %9.6e"  gammaK3 gammaK4 gammaKLimit gammaD1 gammaD2 gammaD3 gammaD4 gammaDLimit
-    lines = [lines; line]
-
-    line = @sprintf "%9.6e, %9.6e, %9.6e, %9.6e, %9.6e, %9.6e, %d, %d"  gammaF1 gammaF2 gammaF3 gammaF4 gammaFLimit gE dmgtype_key dof[1]
-    lines = [lines; line]
-
-     line = @sprintf "%d"  dof[2]
-    lines = [lines; line]
+    lines = [lines; @sprintf "%9.6e, %9.6e, %9.6e, %9.6e, %9.6e, %9.6e, %9.6e, %9.6e" strain1p strain2p strain3p strain4p stress1p stress2p stress3p stress4p]
+    lines = [lines; @sprintf "%9.6e, %9.6e, %9.6e, %9.6e, %9.6e, %9.6e, %9.6e, %9.6e" strain1n strain2n strain3n strain4n stress1n stress2n stress3n stress4n]
+    lines = [lines; @sprintf "%9.6e, %9.6e, %9.6e, %9.6e, %9.6e, %9.6e, %9.6e, %9.6e" rDispP rForceP uForceP rDispN rForceN uForceN gammaK1 gammaK2]
+    lines = [lines; @sprintf "%9.6e, %9.6e, %9.6e, %9.6e, %9.6e, %9.6e, %9.6e, %9.6e" gammaK3 gammaK4 gammaKLimit gammaD1 gammaD2 gammaD3 gammaD4 gammaDLimit]
+    lines = [lines; @sprintf "%9.6e, %9.6e, %9.6e, %9.6e, %9.6e, %9.6e, %d, %d" gammaF1 gammaF2 gammaF3 gammaF4 gammaFLimit gE dmgtype_key dof[1]]
+    lines = [lines; @sprintf "%d" dof[2]]
 
     return lines
 
@@ -2688,9 +2339,7 @@ A vector of strings forming the keyword block.
 function USER_ELEMENT(num_nodes, type, properties, coordinates, variables, dof)
 
     lines = @sprintf "*USER Element, nodes=%d, type=%s, properties=%d, coordinates=%d, variables=%d" num_nodes type properties coordinates variables
-
-    line = @sprintf "%d, %d" dof[1] dof[2]
-    lines = [lines; line]
+    lines = [lines; @sprintf "%d, %d" dof[1] dof[2]]
 
     return lines
 
